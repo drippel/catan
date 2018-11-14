@@ -1,9 +1,187 @@
 package com.github.catan.ascii
 
+import com.github.catan.CatanGen
+import com.github.catan.CatanGen.{Cell, Game, GameState, Terrain}
+
 object HexPrinter {
 
   def main( args : Array[String] ) : Unit = {
     Console.println("hex printer...")
+    val grid = createCatanGrid()
+    printGrid(grid)
+  }
+
+  def addTokens(grid : Array[Array[String]], cells : List[CatanGen.Cell]) = {
+
+    // 3
+    var s = padNumber(cells(0).token)
+    grid(15)(16) = "" + s(0)
+    grid(15)(17) = "" + s(1)
+
+    s = padNumber(cells(1).token)
+    grid(12)(26) = "" + s(0)
+    grid(12)(27) = "" + s(1)
+
+    s = padNumber(cells(2).token)
+    grid(9)(36) = "" + s(0)
+    grid(9)(37) = "" + s(1)
+
+    // 4
+    s = padNumber(cells(3).token)
+    grid(21)(16) = "" + s(0)
+    grid(21)(17) = "" + s(1)
+
+    s = padNumber(cells(4).token)
+    grid(18)(26) = "" + s(0)
+    grid(18)(27) = "" + s(1)
+
+    s = padNumber(cells(5).token)
+    grid(15)(36) = "" + s(0)
+    grid(15)(37) = "" + s(1)
+
+    s = padNumber(cells(6).token)
+    grid(12)(46) = "" + s(0)
+    grid(12)(47) = "" + s(1)
+
+    // 5
+    s = padNumber(cells(7).token)
+    grid(27)(16) = "" + s(0)
+    grid(27)(17) = "" + s(1)
+
+    s = padNumber(cells(8).token)
+    grid(24)(26) = "" + s(0)
+    grid(24)(27) = "" + s(1)
+
+    s = padNumber(cells(9).token)
+    grid(21)(36) = "" + s(0)
+    grid(21)(37) = "" + s(1)
+
+    s = padNumber(cells(10).token)
+    grid(18)(46) = "" + s(0)
+    grid(18)(47) = "" + s(1)
+
+    s = padNumber(cells(11).token)
+    grid(15)(56) = "" + s(0)
+    grid(15)(57) = "" + s(1)
+
+    // 4
+    s = padNumber(cells(12).token)
+    grid(30)(26) = "" + s(0)
+    grid(30)(27) = "" + s(1)
+
+    s = padNumber(cells(13).token)
+    grid(27)(36) = "" + s(0)
+    grid(27)(37) = "" + s(1)
+
+    s = padNumber(cells(14).token)
+    grid(24)(46) = "" + s(0)
+    grid(24)(47) = "" + s(1)
+
+    s = padNumber(cells(15).token)
+    grid(21)(56) = "" + s(0)
+    grid(21)(57) = "" + s(1)
+
+    // 3
+    s = padNumber(cells(16).token)
+    grid(33)(36) = "" + s(0)
+    grid(33)(37) = "" + s(1)
+
+    s = padNumber(cells(17).token)
+    grid(30)(46) = "" + s(0)
+    grid(30)(47) = "" + s(1)
+
+    s = padNumber(cells(18).token)
+    grid(27)(56) = "" + s(0)
+    grid(27)(57) = "" + s(1)
+
+
+  }
+
+  def makeColor( cell : Cell ) : String = {
+    cell.terr.color + cell.terr.symbol + "\u001b[0m"
+  }
+
+  def addTerrain(grid : Array[Array[String]], cells : List[CatanGen.Cell]) = {
+
+    // 3
+    fillCell(grid, 15, 16, makeColor( cells(0) ) )
+    fillCell( grid, 12, 26, makeColor( cells(1) ) )
+    fillCell( grid, 9, 36, makeColor( cells(2) ) )
+
+    fillCell( grid, 21, 16, makeColor( cells(3) ) )
+    fillCell( grid, 18, 26, makeColor( cells(4) ) )
+    fillCell( grid, 15, 36, makeColor( cells(5) ) )
+    fillCell( grid, 12, 46, makeColor( cells(6) ) )
+
+    fillCell( grid, 27, 16, makeColor( cells(7) ) )
+    fillCell( grid, 24, 26, makeColor( cells(8) ) )
+    fillCell( grid, 21, 36, makeColor( cells(9) ) )
+    fillCell( grid, 18, 46, makeColor( cells(10) ) )
+    fillCell( grid, 15, 56, makeColor( cells(11) ) )
+
+    fillCell( grid, 30, 26, makeColor( cells(12) ) )
+    fillCell( grid, 27, 36, makeColor( cells(13) ) )
+    fillCell( grid, 24, 46, makeColor( cells(14) ) )
+    fillCell( grid, 21, 56, makeColor( cells(15) ) )
+
+    fillCell( grid, 33, 36, makeColor( cells(16) ) )
+    fillCell( grid, 30, 46, makeColor( cells(17) ) )
+    fillCell( grid, 27, 56, makeColor( cells(18) ) )
+
+  }
+
+  def fillCell( grid : Array[Array[String]], yoffset : Int, xoffset : Int, symbol : String ) = {
+
+    for( i <- xoffset - 2 to xoffset + 3 ){
+      grid(yoffset - 2)(i) = symbol
+    }
+    for( i <- xoffset - 3 to xoffset + 4 ){
+      grid(yoffset - 1)(i) = symbol
+    }
+    for( i <- xoffset - 3 to xoffset + 4 ){
+      grid(yoffset + 1)(i) = symbol
+    }
+    for( i <- xoffset - 2 to xoffset + 3 ){
+      grid(yoffset + 2)(i) = symbol
+    }
+  }
+
+  def printGame(game : Game ) : Unit = {
+
+    val grid = createCatanGrid()
+
+    val state = game.states.last
+
+    addTokens( grid, game.cells )
+    addTerrain( grid, game.cells )
+
+    printGrid(grid)
+
+  }
+
+  def padNumber( i : Int ) : String = {
+
+    if( i < 10 ){
+      val s = i.toString.padTo(2, '0')
+      s.reverse
+    }
+    else {
+      i.toString
+    }
+
+  }
+
+  def printGrid( grid : Array[Array[String]]) = {
+
+    for( row <- 0 until grid.size ){
+      for( col <- 0 until grid(row).size ){
+        Console.print( grid(row)(col) )
+      }
+      Console.print( "\n" )
+    }
+  }
+
+  def createCatanGrid() : Array[Array[String]] = {
 
     // val board = new AsciiBoard( 0, 6, 0, 6, new LargeFlatAsciiHexPrinter() )
     // val board = new AsciiBoard( 0, 6, 0, 6, new MedFlatAsciiHexPrinter() )
@@ -54,21 +232,28 @@ object HexPrinter {
     board.printHex( "", "", ' ', 5, 4)
     board.printHex( "", "", ' ', 6, 3)
 
-    /*
-    for( x <- 0 to 6 ){
-      for( y <- 0 to 6 ){
-        val s = x +","+ y
-        board.printHex( s, "W", ' ', x, y)
-      }
-    }
-    */
 
+    // now we have a good board size/aspect
+
+    // is it easier to get the grid and over lay the game
+    // or try to insert the game into the grid printing
+    // routines?
+
+    // maybe split into another array of chars or strings
 
     val out = board.prettyPrint(false)
-    Console.println( out )
 
+    val lines = out.split("\n")
+
+    val grid = Array.ofDim[String](lines.size, lines(0).size )
+    for( row <- 0 until lines.size ){
+      for( col <- 0 until lines(row).size ){
+        grid(row)(col) = "" + lines(row)(col)
+      }
+    }
+
+    grid
   }
-
 
   object CharGrid {
     private val LINE_BREAK = "\n"

@@ -1,30 +1,49 @@
 package com.github.catan
 
+import com.github.catan.ascii.HexPrinter
 import org.apache.commons.math3.random.MersenneTwister
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+/*
+Credit where its due
+
+Inspiration from here: https://github.com/mackorone/catan
+Copied/converted the printer from here: https://github.com/cmelchior/asciihexgrid
+ */
 
 object CatanGen {
 
-  class Terrain( val symbol : Char )
-  case class Wheat() extends Terrain('W')
-  case class Coal() extends Terrain('C')
-  case class Sheep() extends Terrain('S')
-  case class Lumber() extends Terrain('L')
-  case class Brick() extends Terrain('B')
-  case class Desert() extends Terrain('D')
+  class Terrain( val code : Char, val symbol : String, val color : String )
+  // ;1 for bold
+  case class Grain()  extends Terrain('G', "~", "\u001b[33m" ) // yellow
+  case class Ore()    extends Terrain('O', "^", "\u001b[34m" ) // blue
+  case class Wool()   extends Terrain('W', "*", "\u001b[37m" )  // white      *
+  case class Lumber() extends Terrain('L', "|", "\u001b[32m" )  // green      |
+  case class Brick()  extends Terrain('B', "=", "\u001b[31m" )  // red        =
+  case class Desert() extends Terrain('D', ".", "\u001b[36m" )  // grey       .
 
   case class Port( t : Option[Terrain] = None )
 
-  class Player( var color : String )
+  class Card( val symbol : Char )
+  case class Knight() extends Card('K')
+  case class Roads() extends Card('R')
+  case class Monopoly() extends Card('M')
+  case class Victory() extends Card('V')
+
+  class Player( var color : String, val hand : List[Card], val played : List[Card] )
 
   case class Cell( terr : Terrain, token : Int )
 
   case class Intersection( x : Int, y : Int, cells : List[Cell] = List(), port : Option[Port] = None, var owner : Option[Player] = None )
 
   case class Road( from : Intersection, to : Intersection, var owner : Option[Player] = None )
+
+  case class GameState( val is : List[Intersection], val rs : List[Road], val deck : List[Card],
+                        val hands : Map[Int,List[Card]], val played : Map[Int,List[Card]] )
+
+  case class Game( val states : ArrayBuffer[GameState], val players : List[Player], val cells : List[Cell] )
 
   val rand = new MersenneTwister()
 
@@ -40,7 +59,13 @@ object CatanGen {
     val is = createIntersections( cs, ps)
     val rs = createRoads(is)
 
-    printMap()
+    val gs = GameState( is, rs, List(), Map(), Map() )
+    val gss = ArrayBuffer[GameState]()
+    gss += gs
+
+    val game = Game( gss, List(), cs )
+
+    HexPrinter.printGame( game )
   }
 
   def shuffle[T]( input : List[T]) : List[T] = {
@@ -64,19 +89,19 @@ object CatanGen {
 
     val ts = new ArrayBuffer[Terrain]()
 
-    ts += Wheat()
-    ts += Wheat()
-    ts += Wheat()
-    ts += Wheat()
+    ts += Grain()
+    ts += Grain()
+    ts += Grain()
+    ts += Grain()
 
-    ts += Coal()
-    ts += Coal()
-    ts += Coal()
+    ts += Ore()
+    ts += Ore()
+    ts += Ore()
 
-    ts += Sheep()
-    ts += Sheep()
-    ts += Sheep()
-    ts += Sheep()
+    ts += Wool()
+    ts += Wool()
+    ts += Wool()
+    ts += Wool()
 
     ts += Lumber()
     ts += Lumber()
@@ -158,11 +183,11 @@ object CatanGen {
     ps += Port()
     ps += Port()
 
-    ps += Port(Some(Wheat()))
-    ps += Port(Some(Coal()))
+    ps += Port(Some(Grain()))
+    ps += Port(Some(Ore()))
     ps += Port(Some(Lumber()))
     ps += Port(Some(Brick()))
-    ps += Port(Some(Sheep()))
+    ps += Port(Some(Wool()))
 
 
     ps.toList
@@ -378,12 +403,6 @@ object CatanGen {
     rs.toList
 
 
-  }
-
-
-  // print the map
-  def printMap() : Unit = {
-    Console.println("print map...")
   }
 
 
