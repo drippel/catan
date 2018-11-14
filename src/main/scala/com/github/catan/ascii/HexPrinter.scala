@@ -5,7 +5,8 @@ object HexPrinter {
   def main( args : Array[String] ) : Unit = {
     Console.println("hex printer...")
 
-    val board = new AsciiBoard( 0, 6, 0, 6, new LargeFlatAsciiHexPrinter() )
+    // val board = new AsciiBoard( 0, 6, 0, 6, new LargeFlatAsciiHexPrinter() )
+    val board = new AsciiBoard( 0, 6, 0, 6, new MedFlatAsciiHexPrinter() )
 
     board.printHex( "", "", ' ', 0, 3)
     board.printHex( "", "", ' ', 1, 2)
@@ -262,14 +263,10 @@ object HexPrinter {
       val charCoordinates = printer.mapHexCoordsToCharCoords(hexQ, hexR)
       val lines = hex.toString.split("\n")
       var i = 0
-      while( {
-        i < lines.length
-      } ) {
+      while( { i < lines.length } ) {
         val content = lines(i)
         var j = 0
-        while( {
-          j < content.length
-        } ) {
+        while( { j < content.length } ) {
           val x = charCoordinates(0) + j
           val y = charCoordinates(1) + i
           // Only override empty spaces
@@ -310,9 +307,7 @@ object HexPrinter {
       // Build output
       sb.append(verticalLine)
       var i = 0
-      while( {
-        i < lines.length
-      } ) {
+      while( { i < lines.length } ) {
         val line = lines(i)
         sb.append("| ")
         sb.append(line)
@@ -323,6 +318,7 @@ object HexPrinter {
           i += 1; i - 1
         }
       }
+
       // Flat hexes have to little bottom space as they use the _ char
       // so add a extra filler line.
       sb.append(spacerLine)
@@ -439,6 +435,66 @@ object HexPrinter {
 
   }
 
+  object MedFlatAsciiHexPrinter {
+
+    // 0 - 13
+    // 12 - 24
+    // 24 - 36
+    // 36 - 48
+    // 48 - 60
+    // 60 - 72
+    // 72 - 84
+    val TEMPLATE2 =
+      "   _ _ _ _  \n" +
+      "  / # # # \\  \n" +
+      " /# # # # #\\ \n" +
+      "/# XXXXXXX #\\\n" +
+      "\\# YYYYYYY #/\n" +
+      " \\# # # # #/ \n" +
+      "  \\_#_#_#_/  \n"
+
+
+    val TEMPLATE = "  + - - +  \n" +
+                   " /       \\ \n" +
+                   "+ XXXXXXX +\n" +
+                   " \\       / \n" +
+                   "  + - - +  \n"
+
+  }
+
+  class MedFlatAsciiHexPrinter extends AsciiHexPrinter {
+
+    final private val width = 11
+    final private val height = 5
+    final private val sideLength = 2
+    final private val sideHeight = 2
+
+    override def getHex(line1 : String, line2 : String, filler : Char) : String = {
+      var lline1 = line1
+      var lline2 = line2
+
+      var hex = new String(MedFlatAsciiHexPrinter.TEMPLATE)
+      lline1 = restrictToLength(lline1, 7)
+      lline2 = restrictToLength(lline2, 7)
+      // hex = hex.replace("XXXXXXX", lline1)
+      //hex = hex.replace("YYYYYYY", lline2)
+      hex.replace('#', filler)
+    }
+
+    override def mapHexCoordsToCharCoords(q : Int, r : Int) : Array[Int] = {
+      val result = new Array[Int](2)
+      result(0) = (width - sideLength - 1) * q
+      result(1) = sideHeight * q + (height - 1) * r
+      result
+    }
+
+    override def getMapSizeInChars(hexWidth : Int, hexHeight : Int) : Array[Int] = {
+      val widthInChars = hexWidth * (width - sideLength) + sideLength
+      val heightInChars = (hexWidth - 1) * height / 2 + hexHeight * height
+      Array[Int](widthInChars, heightInChars)
+    }
+
+  }
 
 
 }
