@@ -6,7 +6,8 @@ object HexPrinter {
     Console.println("hex printer...")
 
     // val board = new AsciiBoard( 0, 6, 0, 6, new LargeFlatAsciiHexPrinter() )
-    val board = new AsciiBoard( 0, 6, 0, 6, new MedFlatAsciiHexPrinter() )
+    // val board = new AsciiBoard( 0, 6, 0, 6, new MedFlatAsciiHexPrinter() )
+    val board = new AsciiBoard( 0, 6, 0, 6, new CatanFlatAsciiHexPrinter() )
 
     board.printHex( "", "", ' ', 0, 3)
     board.printHex( "", "", ' ', 1, 2)
@@ -456,7 +457,7 @@ object HexPrinter {
 
     val TEMPLATE = "  + - - +  \n" +
                    " /       \\ \n" +
-                   "+ XXXXXXX +\n" +
+                   "+         +\n" +
                    " \\       / \n" +
                    "  + - - +  \n"
 
@@ -496,5 +497,57 @@ object HexPrinter {
 
   }
 
+  object CatanFlatAsciiHexPrinter {
+
+    // 0 - 13
+    // 12 - 24
+    // 24 - 36
+    // 36 - 48
+    // 48 - 60
+    // 60 - 72
+    // 72 - 84
+
+    val TEMPLATE = "   + ---- +   \n"+
+                   "  /        \\  \n"+
+                   " /          \\ \n" +
+                   "+            +\n" +
+                   " \\          / \n"+
+                   "  \\        /  \n"+
+                   "   + ---- +   \n"
+  }
+
+  class CatanFlatAsciiHexPrinter extends AsciiHexPrinter {
+
+    final private val width = 14
+    final private val height = 7
+    final private val sideLength = 3
+    final private val sideHeight = 3
+
+    override def getHex(line1 : String, line2 : String, filler : Char) : String = {
+      var lline1 = line1
+      var lline2 = line2
+
+      var hex = new String(CatanFlatAsciiHexPrinter.TEMPLATE)
+      lline1 = restrictToLength(lline1, 7)
+      lline2 = restrictToLength(lline2, 7)
+      // hex = hex.replace("XXXXXXX", lline1)
+      //hex = hex.replace("YYYYYYY", lline2)
+      hex.replace('#', filler)
+    }
+
+    override def mapHexCoordsToCharCoords(q : Int, r : Int) : Array[Int] = {
+      val result = new Array[Int](2)
+      result(0) = (width - sideLength - 1) * q
+      result(1) = sideHeight * q + (height - 1) * r
+      result
+    }
+
+    override def getMapSizeInChars(hexWidth : Int, hexHeight : Int) : Array[Int] = {
+      val widthInChars = hexWidth * (width - sideLength) + sideLength
+      val heightInChars = (hexWidth - 1) * height / 2 + hexHeight * height
+      Array[Int](widthInChars, heightInChars)
+    }
+
+  }
 
 }
