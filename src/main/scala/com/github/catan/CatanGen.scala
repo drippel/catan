@@ -36,13 +36,11 @@ object CatanGen {
     val ps = shuffle(createPorts())
 
     val cs = createCells(ts, ks)
-    // Console.println(cs)
 
     val is = createIntersections( cs, ps)
-    // Console.println(is)
-
     val rs = createRoads(is)
-    Console.println(rs)
+
+    printMap()
   }
 
   def shuffle[T]( input : List[T]) : List[T] = {
@@ -380,6 +378,12 @@ object CatanGen {
     rs.toList
 
 
+  }
+
+
+  // print the map
+  def printMap() : Unit = {
+    Console.println("print map...")
   }
 
 
